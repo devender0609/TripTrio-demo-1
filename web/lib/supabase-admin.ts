@@ -1,13 +1,14 @@
 // web/lib/supabase-admin.ts
-import { createClient } from "@supabase/supabase-js";
+import "server-only";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-// IMPORTANT: keep these only on the server (API routes / server components)
+// These must only exist on the server
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || "";
 
-let admin: ReturnType<typeof createClient> | null = null;
+let admin: SupabaseClient | null = null;
 
-export function getAdmin() {
+export function getAdmin(): SupabaseClient {
   if (!admin) {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
       throw new Error("Supabase admin env vars are missing");
@@ -18,3 +19,7 @@ export function getAdmin() {
   }
   return admin;
 }
+
+// Back-compat for existing imports in routes:
+// import { getSupaAdmin } from "@/lib/supabase-admin"
+export const getSupaAdmin = getAdmin;
