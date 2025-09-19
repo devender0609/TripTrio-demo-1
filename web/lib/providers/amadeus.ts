@@ -1,8 +1,7 @@
 // web/lib/providers/amadeus.ts
-import fetch from "node-fetch";
 
-const AMADEUS_KEY = process.env.AMADEUS_API_KEY || "";
-const AMADEUS_SECRET = process.env.AMADEUS_API_SECRET || "";
+const KEY = process.env.AMADEUS_API_KEY || "";
+const SECRET = process.env.AMADEUS_API_SECRET || "";
 
 let token: string | null = null;
 let tokenExp = 0;
@@ -16,9 +15,11 @@ async function getToken(): Promise<string> {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "client_credentials",
-      client_id: AMADEUS_KEY,
-      client_secret: AMADEUS_SECRET,
+      client_id: KEY,
+      client_secret: SECRET,
     }),
+    // Always server-side
+    cache: "no-store",
   });
   if (!r.ok) throw new Error("Amadeus auth failed");
   const j: any = await r.json();
@@ -30,15 +31,10 @@ async function getToken(): Promise<string> {
 export async function searchLocations(query: string) {
   const tk = await getToken();
   const r = await fetch(
-    `https://test.api.amadeus.com/v1/reference-data/locations?subType=CITY,AIRPORT&keyword=${encodeURIComponent(
-      query
-    )}`,
-    { headers: { Authorization: `Bearer ${tk}` } }
+    `https://test.api.amadeus.com/v1/reference-data/locations?subType=CITY,AIRPORT&keyword=${encodeURIComponent(query)}`,
+    { headers: { Authorization: `Bearer ${tk}` }, cache: "no-store" }
   );
-  if (!r.ok) {
-    const text = await r.text().catch(() => "");
-    throw new Error(`Locations lookup failed: ${text || r.statusText}`);
-  }
+  if (!r.ok) throw new Error("Locations lookup failed");
   const j: any = await r.json();
   return (j.data || []).map((d: any) => ({
     type: String(d.subType || d.type || "").toUpperCase() as "CITY" | "AIRPORT",

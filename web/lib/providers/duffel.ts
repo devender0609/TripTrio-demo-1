@@ -1,44 +1,91 @@
 // web/lib/providers/duffel.ts
-import fetch from "node-fetch";
 
 const DUFFEL_KEY =
-  process.env.DUFFEL_KEY ||
-  process.env.DUFFEL_API_KEY || // allow either name
-  "";
+  process.env.DUFFEL_KEY || process.env.DUFFEL_API_KEY || "";
 const DUFFEL_VERSION = process.env.DUFFEL_VERSION || "v2";
 
-function assertReady() {
-  if (!/^duffel_/.test(DUFFEL_KEY || "")) {
-    throw new Error("Duffel is not configured (set DUFFEL_KEY)");
-  }
+if (!DUFFEL_KEY) {
+  console.warn("[duffel] DUFFEL_KEY / DUFFEL_API_KEY is not set");
 }
 
-async function asJson(r: Response) {
-  if (!r.ok) {
-    const text = await r.text().catch(() => "");
-    let msg = text;
-    try {
-      const j = JSON.parse(text);
-      msg = j?.errors?.[0]?.message || j?.error || text || r.statusText;
-    } catch {}
-    throw new Error(`Duffel ${r.status}: ${msg}`);
-  }
-  return r.json();
-}
+const baseUrl = `https://api.duffel.com/${DUFFEL_VERSION}`;
 
-const base = "https://api.duffel.com";
-
-export async function duffelGetOffer(offer_id: string) {
-  assertReady();
-  const r = await fetch(`${base}/air/offers/${encodeURIComponent(offer_id)}`, {
+async function duf<T = any>(path: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(`${baseUrl}${path}`, {
+    ...init,
     headers: {
-      Authorization: `Bearer ${DUFFEL_KEY}`,
-      "Duffel-Version": DUFFEL_VERSION,
       "Content-Type": "application/json",
-      Accept: "application/json",
+      "Duffel-Version": DUFFEL_VERSION,
+      Authorization: `Bearer ${DUFFEL_KEY}`,
+      ...(init?.headers || {}),
     },
+    cache: "no-store",
   });
-  return asJson(r);
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error(`Duffel ${path} failed (${r.status}): ${txt}`);
+  }
+  return r.json() as Promise<T>;
+}
+
+export async function duffelSearchOffers(params: {
+  origin: string;
+  destination: string;
+  departDate: string;
+  returnDate?: string;
+  passengers?: number;
+  cabin?: "economy" | "premium_economy" | "business" | "first" | string;
+}) {
+  const { origin, destination, departDate, returnDate, passengers = 1, cabin = "economy" } = params;
+
+  const slices: any[] = [
+    { origin, destination, departure_date: departDate },
+  ];
+  if (returnDate) slices.push({ origin: destination, destination: origin, departure_date: returnDate });
+
+  const body = {
+    data: {
+      slices,
+      passengers: Array.from({ length: passengers }).map(() => ({ type: "adult" })),
+      cabin_class: cabin as any,
+    },
+  };
+
+  const j: any = await duf("/air/offer_requests", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+  // Flatten into a simple array of offers with a few useful fields
+  const offers = (j?.data?.offers || j?.data || []).map((o: any) => {
+    const price = Number(o?.total_amount) || Number(o?.price?.total_amount) || 0;
+    const currency = o?.total_currency || o?.price?.total_currency || "USD";
+    const carrier = o?.owner?.iata_code || o?.slices?.[0]?.segments?.[0]?.operating_carrier?.iata_code;
+    const durationMinutes = (() => {
+      const mins = (o?.slices || [])
+        .flatMap((s: any) => s?.segments || [])
+        .reduce((t: number, seg: any) => t + (Number(seg?.duration_in_minutes) || 0), 0);
+      return mins || undefined;
+    })();
+    return {
+      id: o.id,
+      carrier,
+      duration_minutes: durationMinutes,
+      price_usd: currency === "USD" ? price : undefined,
+      price_usd_converted: currency !== "USD" ? price : undefined,
+      currency,
+      segments: o?.slices?.[0]?.segments || [],
+      outbound: o?.slices?.[0]?.segments || [],
+      inbound: o?.slices?.[1]?.segments || [],
+      bookingLinks: {},
+    };
+  });
+
+  return offers;
+}
+
+export async function duffelGetOffer(offerId: string) {
+  return duf(`/air/offers/${offerId}`, { method: "GET" });
 }
 
 export async function duffelCreateOrder(params: {
@@ -46,39 +93,10 @@ export async function duffelCreateOrder(params: {
   contact: { email: string; phone_number: string };
   passengers: any[];
 }) {
-  assertReady();
-  const r = await fetch(`${base}/air/orders`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${DUFFEL_KEY}`,
-      "Duffel-Version": DUFFEL_VERSION,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      data: {
-        type: "orders",
-        selected_offers: [params.offer_id],
-        passengers: params.passengers,
-        contact: params.contact,
-      },
-    }),
-  });
-  return asJson(r);
+  const body = { data: params };
+  return duf("/air/orders", { method: "POST", body: JSON.stringify(body) });
 }
 
-export async function duffelGetOrder(id: string) {
-  assertReady();
-  const r = await fetch(`${base}/air/orders/${encodeURIComponent(id)}`, {
-    headers: {
-      Authorization: `Bearer ${DUFFEL_KEY}`,
-      "Duffel-Version": DUFFEL_VERSION,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-  });
-  return asJson(r);
+export async function duffelGetOrder(orderId: string) {
+  return duf(`/air/orders/${orderId}`, { method: "GET" });
 }
-
-// Optional convenience for health checks
-export const DUFFEL_READY = /^duffel_/.test(DUFFEL_KEY || "");
