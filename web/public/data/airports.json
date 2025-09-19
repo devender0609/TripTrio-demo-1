@@ -1,0 +1,98 @@
+[
+  {
+    "code": "AUS",
+    "name": "Austin\u2013Bergstrom Intl",
+    "city": "Austin",
+    "country": "USA"
+  },
+  {
+    "code": "LAS",
+    "name": "Harry Reid Intl",
+    "city": "Las Vegas",
+    "country": "USA"
+  },
+  {
+    "code": "JFK",
+    "name": "John F. Kennedy Intl",
+    "city": "New York",
+    "country": "USA"
+  },
+  {
+    "code": "LAX",
+    "name": "Los Angeles Intl",
+    "city": "Los Angeles",
+    "country": "USA"
+  },
+  {
+    "code": "SFO",
+    "name": "San Francisco Intl",
+    "city": "San Francisco",
+    "country": "USA"
+  },
+  {
+    "code": "ORD",
+    "name": "O'Hare Intl",
+    "city": "Chicago",
+    "country": "USA"
+  },
+  {
+    "code": "DFW",
+    "name": "Dallas/Fort Worth Intl",
+    "city": "Dallas",
+    "country": "USA"
+  },
+  {
+    "code": "SEA",
+    "name": "Seattle-Tacoma Intl",
+    "city": "Seattle",
+    "country": "USA"
+  },
+  {
+    "code": "ATL",
+    "name": "Hartsfield\u2013Jackson Atlanta Intl",
+    "city": "Atlanta",
+    "country": "USA"
+  },
+  {
+    "code": "BOM",
+    "name": "Chhatrapati Shivaji Maharaj Intl",
+    "city": "Mumbai",
+    "country": "India"
+  },
+  {
+    "code": "DEL",
+    "name": "Indira Gandhi Intl",
+    "city": "Delhi",
+    "country": "India"
+  },
+  {
+    "code": "LHR",
+    "name": "Heathrow",
+    "city": "London",
+    "country": "UK"
+  },
+  {
+    "code": "CDG",
+    "name": "Charles de Gaulle",
+    "city": "Paris",
+    "country": "France"
+  },
+  {
+    "code": "DXB",
+    "name": "Dubai Intl",
+    "city": "Dubai",
+    "country": "UAE"
+  },
+  {
+    "code": "SIN",
+    "name": "Changi",
+    "city": "Singapore",
+    "country": "Singapore"
+  },
+  {
+    "code": "SYD",
+    "name": "Sydney Kingsford Smith",
+    "city": "Sydney",
+    "country": "Australia"
+  }
+]
