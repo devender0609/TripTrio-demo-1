@@ -1,5 +1,5 @@
 // web/app/book/page.tsx
-"use client";
+'use client';
 export const dynamic = 'force-dynamic';
 
 import { useSearchParams, useRouter } from "next/navigation";
