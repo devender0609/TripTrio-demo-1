@@ -1,19 +1,26 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useSearchParams } from "next/navigation";
 
 export default function CompleteClient() {
-  const sp = useSearchParams();
-  const params = useMemo(() => Object.fromEntries(sp.entries()), [sp]);
+  const params = useSearchParams();
+  const orderId = params.get("orderId") || "";
+  const status = params.get("status") || "success";
 
-  // TODO: replace with your actual /book/complete UI
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Book → Complete</h1>
-      <pre className="mt-4 p-3 rounded bg-gray-100 text-sm overflow-auto">
-        {JSON.stringify(params, null, 2)}
-      </pre>
+    <main className="mx-auto max-w-3xl p-6 space-y-4">
+      <h1 className="text-2xl font-semibold">Booking complete</h1>
+      <p>
+        {status === "success"
+          ? "Your booking was completed successfully."
+          : "We couldn't verify your booking just yet. Please check back later."}
+      </p>
+      {orderId && (
+        <div className="rounded border p-4">
+          <div className="text-sm text-gray-500">Order ID</div>
+          <div className="font-mono">{orderId}</div>
+        </div>
+      )}
     </main>
   );
 }

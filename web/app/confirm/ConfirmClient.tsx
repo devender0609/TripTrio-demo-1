@@ -1,20 +1,21 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useSearchParams } from "next/navigation";
 
 export default function ConfirmClient() {
-  const sp = useSearchParams();
-  const params = useMemo(() => Object.fromEntries(sp.entries()), [sp]);
-
-  // TODO: Move your previous /confirm UI here.
+  const params = useSearchParams();
+  const flightId = params.get("flightId") || "";
+  const pax = params.get("pax") || "1";
+  const cabin = params.get("cabin") || "ECONOMY";
 
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Confirm</h1>
-      <pre className="mt-4 p-3 rounded bg-gray-100 text-sm overflow-auto">
-        {JSON.stringify(params, null, 2)}
-      </pre>
+    <main className="mx-auto max-w-3xl p-6 space-y-4">
+      <h1 className="text-2xl font-semibold">Confirm details</h1>
+      <div className="rounded border p-4 space-y-1">
+        <div><b>Flight:</b> {flightId}</div>
+        <div><b>Passengers:</b> {pax}</div>
+        <div><b>Cabin:</b> {cabin}</div>
+      </div>
     </main>
   );
 }

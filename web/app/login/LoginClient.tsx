@@ -1,19 +1,22 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useSearchParams } from "next/navigation";
 
 export default function LoginClient() {
-  const sp = useSearchParams();
-  const params = useMemo(() => Object.fromEntries(sp.entries()), [sp]);
+  const params = useSearchParams();
+  const redirect = params.get("redirect") || "/";
 
-  // TODO: replace with your actual /login UI (e.g., Supabase Auth)
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Login</h1>
-      <pre className="mt-4 p-3 rounded bg-gray-100 text-sm overflow-auto">
-        {JSON.stringify(params, null, 2)}
-      </pre>
+    <main className="mx-auto max-w-md p-6 space-y-4">
+      <h1 className="text-2xl font-semibold">Sign in</h1>
+      <form className="space-y-3">
+        <input className="w-full border rounded p-2" placeholder="Email" type="email" />
+        <input className="w-full border rounded p-2" placeholder="Password" type="password" />
+        <button className="rounded bg-black text-white px-4 py-2 w-full" type="submit">
+          Continue
+        </button>
+      </form>
+      <div className="text-sm text-gray-500">After login you’ll be redirected to: {redirect}</div>
     </main>
   );
 }

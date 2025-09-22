@@ -1,19 +1,20 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useSearchParams } from "next/navigation";
 
-export default function ConfirmClient() {
-  const sp = useSearchParams();
-  const params = useMemo(() => Object.fromEntries(sp.entries()), [sp]);
+export default function CheckoutClient() {
+  const params = useSearchParams();
+  const offerId = params.get("offerId") || params.get("offer_id") || "";
+  const total = params.get("total") || "";
+  const currency = params.get("currency") || "USD";
 
-  // TODO: replace with your actual /confirm UI
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Confirm</h1>
-      <pre className="mt-4 p-3 rounded bg-gray-100 text-sm overflow-auto">
-        {JSON.stringify(params, null, 2)}
-      </pre>
+    <main className="mx-auto max-w-3xl p-6 space-y-4">
+      <h1 className="text-2xl font-semibold">Checkout</h1>
+      <div className="rounded border p-4 space-y-1">
+        <div><b>Offer:</b> {offerId || "—"}</div>
+        <div><b>Total:</b> {total ? `${total} ${currency}` : "—"}</div>
+      </div>
     </main>
   );
 }
