@@ -7,9 +7,7 @@ export default function LoginClient() {
   const sp = useSearchParams();
   const params = useMemo(() => Object.fromEntries(sp.entries()), [sp]);
 
-  // TODO: Move your previous /login UI (client bits) here.
-  // If you’re using Supabase Auth, put the client widgets here.
-
+  // TODO: replace with your actual /login UI (e.g., Supabase Auth)
   return (
     <main className="p-6">
       <h1 className="text-2xl font-semibold">Login</h1>

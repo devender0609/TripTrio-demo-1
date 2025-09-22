@@ -7,8 +7,7 @@ export default function CompleteClient() {
   const sp = useSearchParams();
   const params = useMemo(() => Object.fromEntries(sp.entries()), [sp]);
 
-  // TODO: Move your previous /book/complete UI here.
-
+  // TODO: replace with your actual /book/complete UI
   return (
     <main className="p-6">
       <h1 className="text-2xl font-semibold">Book → Complete</h1>

@@ -1,3 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = { reactStrictMode: true };
-export default nextConfig;
+const nextConfig = {
+  experimental: { typedRoutes: false },
+  // Ensures app-router pages aren’t exported statically by accident
+  output: undefined,
+};
+
+module.exports = nextConfig;
