@@ -1,20 +1,25 @@
 // web/app/login/page.tsx
 "use client";
 
-import { useState } from "react";
-import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
-export default function LoginPage() {
+// If Next tries to prerender this page, force dynamic to avoid CSR bailout
+export const dynamic = "force-dynamic";
+
+function LoginInner() {
   const supabase = getSupabaseBrowser();
   const router = useRouter();
   const qs = useSearchParams();
+
+  // Read redirect inside a Suspense boundary (this component is rendered inside <Suspense>)
   const redirectTo = qs.get("redirect") || "/";
 
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -46,17 +51,17 @@ export default function LoginPage() {
     setMsg(null);
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const url =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
+          : undefined;
+
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo:
-            typeof window !== "undefined"
-              ? `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
-              : undefined,
-        },
+        options: { redirectTo: url }, // Supabase will redirect to this after the provider callback
       });
       if (error) throw error;
-      // Redirect handled by Supabase; `data.url` is opened automatically.
+      // Supabase opens provider url automatically; nothing else to do here.
     } catch (e: any) {
       setErr(e?.message || "Google sign-in failed");
       setLoading(false);
@@ -82,6 +87,7 @@ export default function LoginPage() {
           </div>
         )}
 
+        {/* Email / password */}
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-1">Email</label>
@@ -115,12 +121,14 @@ export default function LoginPage() {
           </button>
         </form>
 
+        {/* Divider */}
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-gray-200" />
           <span className="text-xs text-gray-400">or</span>
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
+        {/* Google */}
         <button
           onClick={signInWithGoogle}
           disabled={loading}
@@ -129,24 +137,19 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
+        {/* Toggle */}
         <div className="mt-6 text-center text-sm">
           {mode === "signin" ? (
             <>
               Don&apos;t have an account?{" "}
-              <button
-                className="text-blue-600 underline"
-                onClick={() => setMode("signup")}
-              >
+              <button className="text-blue-600 underline" onClick={() => setMode("signup")}>
                 Sign up
               </button>
             </>
           ) : (
             <>
               Already have an account?{" "}
-              <button
-                className="text-blue-600 underline"
-                onClick={() => setMode("signin")}
-              >
+              <button className="text-blue-600 underline" onClick={() => setMode("signin")}>
                 Sign in
               </button>
             </>
@@ -158,5 +161,14 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  // Wrap the component that uses useSearchParams in Suspense to satisfy Next build
+  return (
+    <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center">Loading…</div>}>
+      <LoginInner />
+    </Suspense>
   );
 }
