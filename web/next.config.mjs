@@ -1,8 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: { typedRoutes: false },
-  // Ensures app-router pages aren’t exported statically by accident
+
+  // Ensure these pages aren’t statically exported
+  // (remove this if you intentionally use `output: 'export'`)
   output: undefined,
+
+  // If you added rewrites/headers, keep them here as functions
+  // async rewrites() { return []; },
+  // async headers() { return []; },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
