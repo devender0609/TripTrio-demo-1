@@ -1,5 +1,4 @@
-// web/app/auth/callback/page.tsx
-import { Suspense } from "react";
+﻿import { Suspense } from "react";
 import CallbackClient from "./CallbackClient";
 
 export const dynamic = "force-dynamic";
