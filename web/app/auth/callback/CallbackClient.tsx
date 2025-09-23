@@ -1,4 +1,4 @@
-// web/app/auth/callback/CallbackClient.tsx
+@'
 "use client";
 
 import { useEffect, useState } from "react";
@@ -37,3 +37,4 @@ export default function CallbackClient() {
     </div>
   );
 }
+'@ | Set-Content web/app/auth/callback/CallbackClient.tsx -Encoding UTF8
