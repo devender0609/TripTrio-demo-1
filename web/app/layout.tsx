@@ -1,18 +1,11 @@
-import "./globals.css";
-import type { ReactNode } from "react";
-import NavBar from "../components/NavBar";
+// web/app/layout.tsx (server)
+import { Suspense } from "react";
 
-export const metadata = {
-  title: "TripTrio",
-  description: "Top-3 smarter travel picks",
-};
-
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <NavBar />
-        {children}
+        <Suspense fallback={null}>{children}</Suspense>
       </body>
     </html>
   );
