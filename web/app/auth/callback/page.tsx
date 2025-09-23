@@ -1,13 +1,11 @@
-﻿import { Suspense } from "react";
-import CallbackClient from "./CallbackClient";
+﻿import NextDynamic from "next/dynamic";
 
+// Render client-only to avoid prerender/SSG evaluating useSearchParams
+const CallbackClient = NextDynamic(() => import("./CallbackClient"), { ssr: false });
+
+// Ensure this page is never statically rendered
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default function Page() {
-  return (
-    <Suspense fallback={<div className="p-6 text-center">Completing sign-in…</div>}>
-      <CallbackClient />
-    </Suspense>
-  );
+  return <CallbackClient />;
 }

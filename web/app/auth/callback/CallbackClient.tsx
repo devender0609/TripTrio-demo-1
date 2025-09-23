@@ -1,27 +1,34 @@
 ﻿"use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function CallbackClient() {
-  const supabase = getSupabaseBrowser();
   const router = useRouter();
   const qs = useSearchParams();
 
-  useEffect(() => {
-    const error = qs.get("error_description") || qs.get("error");
-    const redirect = qs.get("redirect") || "/";
+  const redirect = qs.get("redirect") || "/";
+  const error = qs.get("error") || "";
+  const message = qs.get("message") || "";
 
+  const [status, setStatus] = useState("Finishing sign-in…");
+
+  useEffect(() => {
     if (error) {
-      router.replace(`/login?error=${encodeURIComponent(error)}`);
+      setStatus(error || "Something went wrong. You can close this tab.");
       return;
     }
+    // small delay so the tab isn’t an immediate bounce
+    const t = setTimeout(() => router.replace(redirect), 500);
+    return () => clearTimeout(t);
+  }, [error, redirect, router]);
 
-    supabase.auth.getSession().finally(() => {
-      router.replace(redirect);
-    });
-  }, [qs, router, supabase]);
-
-  return <div className="p-6 text-center">Completing sign-in…</div>;
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className="w-full max-w-md text-center">
+        <h1 className="text-xl font-semibold mb-2">Redirecting…</h1>
+        <p className="text-gray-600">{status || message}</p>
+      </div>
+    </div>
+  );
 }
