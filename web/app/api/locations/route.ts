@@ -1,14 +1,21 @@
+// web/app/api/locations/route.ts
 import { NextResponse } from "next/server";
-import { searchLocations } from "@/lib/providers/amadeus";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const q = String(searchParams.get("q") || "").trim();
-  if (!q) return NextResponse.json({ items: [] });
-  try {
-    const items = await searchLocations(q);
-    return NextResponse.json({ items });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Locations failed" }, { status: 500 });
-  }
+  const q = searchParams.get("q") || "";
+  // Where your Express API is running:
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_BASE ||
+    process.env.API_BASE ||                // fallback if you prefer a private var name
+    "http://localhost:4000";
+
+  const upstream = `${API_BASE}/locations?q=${encodeURIComponent(q)}`;
+  const r = await fetch(upstream, { cache: "no-store" });
+  if (!r.ok) return NextResponse.json({ items: [] }, { status: 200 });
+
+  const data = await r.json();
+  return NextResponse.json(data);
 }
