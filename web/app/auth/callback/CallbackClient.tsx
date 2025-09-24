@@ -1,16 +1,21 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function CallbackClient() {
   const router = useRouter();
   const qs = useSearchParams();
+  const redirect = qs.get("redirect") || "/";
 
   useEffect(() => {
-    const redirect = qs.get("redirect") || "/";
-    router.replace(redirect);
-  }, [qs, router]);
+    // Ensure Supabase picks up the session from the URL hash and then redirect
+    const supabase = getSupabaseBrowser();
+    supabase.auth.getSession().finally(() => {
+      router.replace(redirect);
+    });
+  }, [router, redirect]);
 
-  return <div className="p-6 text-sm text-gray-500">Completing sign-in…</div>;
+  return null;
 }
